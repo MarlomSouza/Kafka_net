@@ -1,25 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using KafkaNet;
-using KafkaNet.Model;
-using KafkaNet.Protocol;
+using System.Text;
+using Confluent.Kafka;
+using Confluent.Kafka.Serialization;
 
 namespace kafkaNetProducer
 {
     class Produce
     {
-        private readonly Uri uri;
-        private readonly KafkaOptions options;
-        private readonly BrokerRouter router;
-        private readonly Producer client;
+        private const string bootstrapServer = "bootstrap.servers";
+        private readonly string uri;
         private readonly string topic;
 
         public Produce()
         {
-            uri = new Uri("http://localhost:9092");
-            options = new KafkaOptions(uri);
-            router = new BrokerRouter(options);
-            client = new Producer(router);
+            uri = "localhost:9092";
             topic = "IDGTestTopic";
             ProduzirMensagem();
         }
@@ -29,14 +24,22 @@ namespace kafkaNetProducer
         private void ProduzirMensagem()
         {
 
-            while (EnviarMensagem())
+            var config = new Dictionary<string, object> { { bootstrapServer, uri } };
+
+            using (var producer = new Producer<Null, string>(config, null, new StringSerializer(Encoding.UTF8)))
             {
-                Console.WriteLine("Escreva sua mensagem: ");
-                string payload = Console.ReadLine();
-                Message msg = new Message(payload);
-                client.SendMessageAsync(topic, new List<Message> { msg }).Wait();
+                EnviarMensagem(producer);
+                EnviarMensagem(producer);
+                EnviarMensagem(producer);
+                EnviarMensagem(producer);
             }
-            Console.WriteLine("Encerrado.");
+
+        }
+
+        private void EnviarMensagem(Producer<Null, string> producer)
+        {
+            var dr = producer.ProduceAsync(topic, null, "test message text").Result;
+            Console.WriteLine($"Delivered '{dr.Value}' to: {dr.TopicPartitionOffset}");
         }
 
         public bool EnviarMensagem()
