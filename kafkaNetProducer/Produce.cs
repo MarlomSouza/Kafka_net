@@ -14,7 +14,7 @@ namespace kafkaNetProducer
 
         public Produce()
         {
-            uri = "localhost:9092";
+            uri = "localhost:9092,localhost:9092";
             topic = "IDGTestTopic";
             ProduzirMensagem();
         }
@@ -28,18 +28,21 @@ namespace kafkaNetProducer
 
             using (var producer = new Producer<Null, string>(config, null, new StringSerializer(Encoding.UTF8)))
             {
-                EnviarMensagem(producer);
-                EnviarMensagem(producer);
-                EnviarMensagem(producer);
-                EnviarMensagem(producer);
+                var i = 1;
+                while (i <= 10)
+                {
+                    EnviarMensagem(producer, i % 2);
+                    i++;
+                }
             }
 
         }
 
-        private void EnviarMensagem(Producer<Null, string> producer)
+        private void EnviarMensagem(Producer<Null, string> producer, int particao)
         {
-            var dr = producer.ProduceAsync(topic, null, "test message text").Result;
-            Console.WriteLine($"Delivered '{dr.Value}' to: {dr.TopicPartitionOffset}");
+            particao++;
+            var dr = producer.ProduceAsync(topic, null, "test message text", particao).Result;
+            Console.WriteLine($"Delivered '{dr.Value}' to: {dr.TopicPartitionOffset} {dr.Partition}");
         }
 
         public bool EnviarMensagem()
