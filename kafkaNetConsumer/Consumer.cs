@@ -30,7 +30,6 @@ namespace kafkaNetConsumer
 
             using (var consumer = new Consumer<Null, string>(conf, null, new StringDeserializer(Encoding.UTF8)))
             {
-
                 consumer.OnMessage += (_, msg) =>
                 {
                     var err = consumer.CommitAsync().Result.Error;
@@ -57,33 +56,14 @@ namespace kafkaNetConsumer
         {
             ExecutarOCR();
             consumer.Poll(TimeSpan.FromMilliseconds(10));
-
         }
 
         private static void ExecutarOCR()
         {
             Console.Write("Executando comando no CMD ");
 
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-            System.Diagnostics.ProcessStartInfo startInfo = new System.Diagnostics.ProcessStartInfo();
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardOutput = true;
-            startInfo.FileName = "CMD.exe";
-            process.EnableRaisingEvents = true;
-            process.Exited += p_Exited;
-
-            startInfo.Arguments = "/c  timeout /t 10 && echo 0oooooi";
-            // startInfo.Arguments = "/c docker exec -it goocr go run main.go http://bonstutoriais.com.br/wp-content/uploads/2014/05/cionverter-texto-de-imagem-850x478.jpg";
-            process.StartInfo = startInfo;
-            process.Start();
-            string output = process.StandardOutput.ReadToEnd();
-            Console.WriteLine(output);
-            process.WaitForExit();
+           
             Console.WriteLine("Commando finalizado ");
-        }
-        public static void p_Exited(object sender, EventArgs e)
-        {
-            Console.WriteLine("Enviou para fila de processados");
         }
         private static void OCR(Message<Null, string> msg)
         {
