@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
@@ -16,40 +17,37 @@ namespace kafkaNetProducer
         {
             uri = "localhost:9092,localhost:9092";
             topic = "IDGTestTopic";
-            ProduzirMensagem();
+            LerArquivo();
         }
 
         static void Main(string[] args) => new Produce();
 
-        private void ProduzirMensagem()
+        private void ProduzirMensagem(string link)
         {
-
             var config = new Dictionary<string, object> { { bootstrapServer, uri } };
 
             using (var producer = new Producer<Null, string>(config, null, new StringSerializer(Encoding.UTF8)))
             {
-                var i = 1;
-                while (i <= 10)
-                {
-                    EnviarMensagem(producer, i % 2);
-                    i++;
-                }
+                EnviarMensagem(producer, link);
             }
-
         }
 
-        private void EnviarMensagem(Producer<Null, string> producer, int particao)
+        private void EnviarMensagem(Producer<Null, string> producer, string link)
         {
-            particao++;
-            var dr = producer.ProduceAsync(topic, null, "test message text", particao).Result;
+            var dr = producer.ProduceAsync(topic, null, link).Result;
             Console.WriteLine($"Delivered '{dr.Value}' to: {dr.TopicPartitionOffset} {dr.Partition}");
         }
 
-        public bool EnviarMensagem()
+        public void LerArquivo()
         {
-            Console.WriteLine("Deseja enviar mais mensagem? ");
-            return Console.ReadLine().Contains("s");
+            const Int32 BufferSize = 128;
+            using (var fileStream = File.OpenRead(@"H:\Projetos\Dotnet\Kafka_net\links.txt"))
+            using (var streamReader = new StreamReader(fileStream, Encoding.UTF8, true, BufferSize)) {
+                String line;
+                while ((line = streamReader.ReadLine()) != null){
+                    ProduzirMensagem(line);
+                }
+            }
         }
-
     }
 }
