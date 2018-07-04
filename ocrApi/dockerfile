@@ -1,0 +1,6 @@
+
+FROM microsoft/dotnet:2.0-sdk
+WORKDIR /var/www/
+RUN apt-get update && apt-get install -y && \
+    apt-get install tesseract-ocr -y && \
+    apt-get install tesseract-ocr-por

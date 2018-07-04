@@ -41,7 +41,7 @@ namespace kafkaNetProducer
         private void EnviarMensagem(Producer<Null, string> producer, int particao)
         {
             particao++;
-            var dr = producer.ProduceAsync(topic, null, "test message text", particao).Result;
+            var dr = producer.ProduceAsync(topic, null, "test message text").Result;
             Console.WriteLine($"Delivered '{dr.Value}' to: {dr.TopicPartitionOffset} {dr.Partition}");
         }
 
