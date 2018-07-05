@@ -41,10 +41,12 @@ namespace kafkaNetProducer
         public void LerArquivo()
         {
             const Int32 BufferSize = 128;
-            using (var fileStream = File.OpenRead(@"H:\Projetos\Dotnet\Kafka_net\links.txt"))
-            using (var streamReader = new StreamReader(fileStream, Encoding.UTF8, true, BufferSize)) {
+            using (var fileStream = File.OpenRead(@"links.txt"))
+            using (var streamReader = new StreamReader(fileStream, Encoding.UTF8, true, BufferSize))
+            {
                 String line;
-                while ((line = streamReader.ReadLine()) != null){
+                while ((line = streamReader.ReadLine()) != null)
+                {
                     ProduzirMensagem(line);
                 }
             }
