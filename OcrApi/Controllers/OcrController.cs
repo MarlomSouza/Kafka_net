@@ -17,16 +17,22 @@ namespace OcrApi.Controllers
         }
         // POST api/values
 
+        [HttpGet]
+        public ActionResult Get()
+        {
+            return new JsonResult("ok");
+        }
+
         [HttpPost]
         public async void PostAsync([FromBody]string[] links)
         {
             try
             {
-                foreach (var link in links)
-                {
-                    await ocr.ExecuteOcrAsync(link);
-                }
 
+                for (int i = 0; i < 10; i++)
+                {
+                    await ocr.ExecuteOcrAsync("https://blogmeninasimples.files.wordpress.com/2012/09/texto-fc3a3.jpg").ConfigureAwait(false);
+                }
             }
             catch (System.Exception)
             {
