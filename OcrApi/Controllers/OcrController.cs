@@ -28,10 +28,9 @@ namespace OcrApi.Controllers
         {
             try
             {
-
                 for (int i = 0; i < 10; i++)
                 {
-                    await ocr.ExecuteOcrAsync("https://blogmeninasimples.files.wordpress.com/2012/09/texto-fc3a3.jpg").ConfigureAwait(false);
+                    await ocr.ExecuteOcrAsync(links[0]).ConfigureAwait(false);
                 }
             }
             catch (System.Exception)
