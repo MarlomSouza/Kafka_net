@@ -11,27 +11,34 @@ namespace OcrApi
     {
         private const string NomeImage = "imagemTexto.jpg";
         private const string TextoImage = "imagemTexto";
-        public async Task ExecuteOcrAsync(string url)
+        public async Task ExecuteOcrAsync(string url, int quantidade)
         {
             await SalvarImagemLocalAsync(url);
-            Console.WriteLine($"Executando comando no CMD");
+            Console.WriteLine($"Executando comando no CMD {quantidade}");
 
-            ExecuteTesseract();
-            Console.WriteLine("Commando finalizado ");
+            ExecuteTesseract(quantidade);
+
+            Console.WriteLine($"Commando finalizado {quantidade}");
         }
 
-        private void ExecuteTesseract()
+        private void ExecuteTesseract(int quantidade)
+        {
+            // string comando = $"-c \"tesseract {ObterImagem()} {TextoImage + quantidade} -l por\"";
+            string comando = $"/c timeout /t 10";
+            ExecuteTesseract(comando);
+        }
+        private void ExecuteTesseract(string comando)
         {
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardOutput = true;
-            startInfo.FileName = "/bin/bash";
+            startInfo.FileName = "CMD.exe";
+            // startInfo.FileName = "/bin/bash";
             process.EnableRaisingEvents = true;
             process.Exited += p_Exited;
-            string comando = $"\"tesseract {ObterImagem()} {TextoImage} -l por\"";
             Console.WriteLine(comando);
-            startInfo.Arguments = $"-c {comando}";
+            startInfo.Arguments = $"{comando}";
             // startInfo.Arguments = "/c docker exec -it goocr go run main.go http://bonstutoriais.com.br/wp-content/uploads/2014/05/cionverter-texto-de-imagem-850x478.jpg";
             process.StartInfo = startInfo;
             process.Start();
@@ -56,7 +63,6 @@ namespace OcrApi
             }
 
         }
-
 
         private void RemoverImagem()
         {

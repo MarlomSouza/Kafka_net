@@ -21,5 +21,5 @@ COPY . /app
 # RUN dotnet publish -c Debug -o out
 
 # Kick off a container just to wait debugger to attach and run the app
-CMD [ "dotnet", "run" ]
-# ENTRYPOINT ["/bin/bash", "-c", "sleep infinity"]
+CMD [ "dotnet", "buildx" ]
+ENTRYPOINT ["/bin/bash", "-c", "sleep infinity"]
