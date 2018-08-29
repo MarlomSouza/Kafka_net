@@ -25,16 +25,13 @@ namespace OcrApi.Controllers
         }
 
         [HttpPost]
-        public async void PostAsync([FromBody]string[] links)
+        public async void PostAsync([FromBody]string links)
         {
             System.Diagnostics.Debug.WriteLine("entrou");
             Console.WriteLine("entrou no metodo");
             try
             {
-                for (int i = 0; i < 10; i++)
-                {
-                    await Task.Factory.StartNew(action: async () => { await ocr.ExecuteOcrAsync(links[0], i); });
-                }
+                await ocr.ExecuteOcrAsync(links);
             }
             catch (System.Exception)
             {

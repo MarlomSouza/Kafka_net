@@ -11,24 +11,15 @@ namespace OcrApi
     {
         private const string NomeImage = "imagemTexto.jpg";
         private const string TextoImage = "imagemTexto";
-        public async Task ExecuteOcrAsync(string url, int quantidade)
+        public async Task ExecuteOcrAsync(string url)
         {
-            await SalvarImagemLocalAsync(url);
-            Console.WriteLine($"Executando comando no CMD {quantidade}");
-
-            ExecuteTesseract(quantidade);
-
-            Console.WriteLine($"Commando finalizado {quantidade}");
+            await ObterImagemUrl(url);
         }
 
-        private void ExecuteTesseract(int quantidade)
+        private async Task ExecuteTesseract()
         {
             // string comando = $"-c \"tesseract {ObterImagem()} {TextoImage + quantidade} -l por\"";
-            string comando = $"/c timeout /t 10";
-            ExecuteTesseract(comando);
-        }
-        private void ExecuteTesseract(string comando)
-        {
+            string comando = @"/c echo mas isso não podia acontecer";
             Process process = new Process();
             ProcessStartInfo startInfo = new ProcessStartInfo();
             startInfo.UseShellExecute = false;
@@ -52,23 +43,37 @@ namespace OcrApi
             Console.WriteLine("Terminou o comando");
             // RemoverImagem();
         }
-        public async Task SalvarImagemLocalAsync(string url)
+        public async Task ObterImagemUrl(string url)
         {
-
-            using (var httpClient = new HttpClient())
-            using (var contentStream = await httpClient.GetStreamAsync(url))
-            using (var fileStream = new FileStream(NomeImage, FileMode.Create, FileAccess.Write, FileShare.None, 1048576, true))
+            try
             {
-                await contentStream.CopyToAsync(fileStream);
+                using (var httpClient = new HttpClient())
+                using (var contentStream = await httpClient.GetStreamAsync(url))
+                    SalvarImagemLocalAsync(contentStream);
+
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message);
+                throw;
             }
 
         }
 
-        private void RemoverImagem()
+        private async Task SalvarImagemLocalAsync(Stream contentStream)
+        {
+            using (var fileStream = new FileStream(NomeImage, FileMode.Create, FileAccess.Write, FileShare.None, 1048576, true))
+            {
+                await contentStream.CopyToAsync(fileStream);
+            }
+            ExecuteTesseract();
+        }
+
+        private async Task RemoverImagem()
         {
             File.Delete(NomeImage);
         }
-        private string ObterImagem()
+        private async Task<String> ObterImagem()
         {
             return Path.GetFileName(NomeImage);
         }
