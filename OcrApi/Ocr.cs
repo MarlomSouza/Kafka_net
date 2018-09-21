@@ -61,7 +61,6 @@ namespace OcrApi
             {
                 await contentStream.CopyToAsync(fileStream);
             }
-
         }
 
         private void RemoverImagem()

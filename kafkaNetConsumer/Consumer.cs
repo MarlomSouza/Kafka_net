@@ -18,13 +18,13 @@ namespace kafkaNetConsumer
             {
             { "group.id", "test-consumer-group" },
             { "bootstrap.servers", "localhost:9092" },
-            { "auto.offset.reset", "earliest" }
+            { "auto.offset.reset", "earliest" },
+            { "auto.commit.enable", false }
             };
-            Consume();
-            // ExecutarOCR();
+            ConsumirFila();
         }
 
-        private static void Consume()
+        private static void ConsumirFila()
         {
             var topic = "IDGTestTopic";
 
@@ -34,7 +34,7 @@ namespace kafkaNetConsumer
                 {
                     var err = consumer.CommitAsync().Result.Error;
                     if (!err)
-                        OCR(msg);
+                        ImprimirMensagem(msg);
                 };
 
                 consumer.OnError += (_, error)
@@ -47,31 +47,16 @@ namespace kafkaNetConsumer
                 while (true)
                 {
                     BuscarNovaMensagem(consumer);
-                    Console.WriteLine("Puxando nova mensagem......");
                 }
             }
         }
 
-        private static void BuscarNovaMensagem(Consumer<Null, string> consumer)
-        {
-            ExecutarOCR();
-            consumer.Poll(TimeSpan.FromMilliseconds(10));
-        }
+        private static void BuscarNovaMensagem(Consumer<Null, string> consumer) =>
+            consumer.Poll(TimeSpan.FromMilliseconds(100));
+        
 
-        private static void ExecutarOCR()
-        {
-            Console.Write("Executando comando no CMD ");
-
-           
-            Console.WriteLine("Commando finalizado ");
-        }
-        private static void OCR(Message<Null, string> msg)
-        {
+        private static void ImprimirMensagem(Message<Null, string> msg) =>
             Console.WriteLine($"Read '{msg.Value}' from: {msg.TopicPartitionOffset}");
-        }
-
-
-
     }
 
 }

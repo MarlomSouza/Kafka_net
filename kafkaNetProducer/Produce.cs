@@ -15,9 +15,12 @@ namespace kafkaNetProducer
 
         public Produce()
         {
-            uri = "localhost:9092,localhost:9092";
+            uri = "localhost:9092";
             topic = "IDGTestTopic";
-            LerArquivo();
+            for (int i = 0; i < 10; i++)
+            {
+                ProduzirMensagem(i.ToString());    
+            }   
         }
 
         static void Main(string[] args) => new Produce();

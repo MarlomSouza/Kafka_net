@@ -6,4 +6,4 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - D:\Projetos\kafka\kafkaNet\ocrApi\:/var/www
+      - .:/var/www
