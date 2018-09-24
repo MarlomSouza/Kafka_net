@@ -12,6 +12,7 @@ namespace kafkaNetConsumer
     class Consumer
     {
         static Dictionary<string, object> conf;
+        private static string topic = "IDGTestTopic";
 
         static void Main(string[] args)
         {
@@ -19,7 +20,7 @@ namespace kafkaNetConsumer
             {
             { "group.id", Guid.NewGuid() },
             { "bootstrap.servers", "localhost:9092" },
-            { "enable.auto.commit", true},
+            { "enable.auto.commit", false},
             {"enable.auto.offset.store", false},
             { "default.topic.config", new Dictionary<string, object>()
                 {
@@ -35,11 +36,8 @@ namespace kafkaNetConsumer
 
         private static void ConsumirFila()
         {
-            var topic = "IDGTestTopic";
-
             using (var consumer = new Consumer<Null, string>(conf, null, new StringDeserializer(Encoding.UTF8)))
             {
-                
                 consumer.OnMessage += (_, msg) =>
                 {
                     var err = consumer.CommitAsync().Result.Error;
@@ -53,7 +51,7 @@ namespace kafkaNetConsumer
                 consumer.OnConsumeError += (_, msg)
                   => Console.WriteLine($"Consume error ({msg.TopicPartitionOffset}): {msg.Error}");
 
-                consumer.Subscribe(topic);
+                
                 while (true)
                 {
                     BuscarNovaMensagem(consumer);
@@ -68,47 +66,55 @@ namespace kafkaNetConsumer
         private static void ImprimirMensagem(Message<Null, string> msg) =>
             Console.WriteLine($"Read '{msg.Value}' from: {msg.TopicPartitionOffset}");
 
-        private static void ConsumirMensagemEspecifica()
+     public static void ConsumirMensagemEspecifica()
         {
-            var topic = "IDGTestTopic";
-            var topico = ConsumirDeOnde(topic);
-            using (var consumer = new Consumer<Null, string>(conf, null, new StringDeserializer(Encoding.UTF8)))
+            conf = new Dictionary<string, object>{
+            { "group.id", new Guid().ToString() },
+                { "bootstrap.servers", "localhost:9092" },
+                // partition offsets can be committed to a group even by consumers not
+                // subscribed to the group. in this example, auto commit is disabled
+                // to prevent this from occuring.
+                { "enable.auto.commit", false }
+            };
+            using (var consumer = new Consumer<Ignore, string>(conf, null, new StringDeserializer(Encoding.UTF8)))
             {
-                
-                consumer.OnMessage += (_, msg) =>
-                {
-                    var err = consumer.CommitAsync().Result.Error;
-                    if (!err)
-                        ImprimirMensagem(msg);
-                };
+                consumer.Assign(ConsumirDeOnde());
 
+                // Raised on critical errors, e.g. connection failures or all brokers down.
                 consumer.OnError += (_, error)
-                  => Console.WriteLine($"Error: {error}");
+                    => Console.WriteLine($"Error: {error}");
 
-                consumer.OnConsumeError += (_, msg)
-                  => Console.WriteLine($"Consume error ({msg.TopicPartitionOffset}): {msg.Error}");
-                
-                
+                // Raised on deserialization errors or when a consumed message has an error != NoError.
+                consumer.OnConsumeError += (_, error)
+                    => Console.WriteLine($"Consume error: {error}");
+
                 while (true)
                 {
-                    consumer.Assign(CriarTopicos(topic));
+                    if (consumer.Consume(out Message<Ignore, string> msg, TimeSpan.FromSeconds(1)))
+                    {
+                        Console.WriteLine($"Topic: {msg.Topic} Partition: {msg.Partition} Offset: {msg.Offset} {msg.Value}");
+                    }
                 }
             }
         }
 
-        private static IEnumerable<TopicPartitionOffset> ConsumirDeOnde(string topic)
+        private static IEnumerable<TopicPartitionOffset> ConsumirDeOnde()
         {
-            var offset = new Offset();
-            var topico = new TopicPartitionOffset(topic, 0, offset);
-            var topicos = new[] { topico };
+            // TopicPartitionOffset topico = ParticaoOffSet();
+            var topicos = new[] { new TopicPartitionOffset(topic, 0, Offset.Beginning) };
             return topicos;
         }
 
-        private static TopicPartition[] CriarTopicos(string topic)
+        private static TopicPartitionOffset ParticaoOffSet()
+        {
+            var topico = new TopicPartitionOffset(topic, 0, Offset.Beginning);
+            return topico;
+        }
+
+        private static TopicPartition[] CriarTopicos()
         {
             TopicPartition partition0 = new TopicPartition(topic, 0);
-            TopicPartition partition1 = new TopicPartition(topic, 1);
-            var topicos = new[] { partition0, partition1 };
+            var topicos = new[] { partition0 };
             return topicos;
         }
     }

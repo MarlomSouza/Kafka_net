@@ -38,7 +38,7 @@ namespace kafkaNetProducer
         private void EnviarMensagem(Producer<Null, string> producer, string link)
         {
             var dr = producer.ProduceAsync(topic, null, link).Result;
-            Console.WriteLine($"Delivered '{dr.Value}' to: {dr.TopicPartitionOffset} {dr.Partition}");
+            Console.WriteLine($"Delivered '{dr.Value}' to: {dr.TopicPartitionOffset} Particao: {dr.Partition}");
         }
 
         public void LerArquivo()
